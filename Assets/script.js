@@ -1,139 +1,233 @@
-const modelsCatalog = [
-    { title: "BetLDP", desc: "Casino ficticio, mete dinero con cupones: NUEVO USUARIO o paga +542215989210...", link: "https://betldpoficial-sudo.github.io/bet-ldp/" },
-    { title: "Descargador de Archivos.bat", desc: "Modelo .bat: introducis la URL, seleccionas ubicación.", link: "./Models/downloader.html?=Descargador_de_Archivos.bat.zip" },
-    { title: "Mercado en Progreso", desc: "Minijuego de compra/venta de objetos ficticios.", link: "./Models/Mercado_en_Progreso.html" },
-    { title: "Registros de micros", desc: "Carga registros de viajes, lineas y recorridos Union Platense S.A.", link: "./Models/Registros_de_micros/index.html" },
-    { title: "Ruleta Rusa", desc: "Carga participantes y desafía a la suerte.", link: "./Models/Ruleta_Rusa.html" },
-    { title: "Creador de Codigos QR", desc: "Personaliza color, contenido y destinatario.", link: "./Models/Creador_de_Codigos_QR.html" },
-    { title: "Acortador de URLS", desc: "Acortador potenciado por Google y GitHub.", link: "./Models/Acortador de URLS.html" },
-    { title: "Eliminador de Archivos Temporales", desc: "Limpia tu PC de archivos temporales innecesarios.", link: "./Models/downloader.html?=Eliminador_de_Archivos_Temporales.zip" },
-    { title: "Programar Apagado Automatico", desc: "Programa el apagado de tu PC con opciones personalizadas.", link: "./Models/downloader.html?=Programar_apagado_automatico.zip" },
-];
+const urlPreviewSpan = document.getElementById("previewUrl");
+const inputSiglas = document.getElementById("siglasAlias");
+const inputUrl = document.getElementById("urlOriginal");
+const btnEnviar = document.getElementById("btnEnviar");
+const resultArea = document.getElementById("resultArea");
+const resultMessage = document.getElementById("resultMessage");
+const generatedLinkDiv = document.getElementById("generatedLinkDiv");
 
-function buildMarketplaceGrid() {
-    const grid = document.getElementById('modelsGrid');
-    if (!grid) return;
-    
-    grid.innerHTML = '';
-    modelsCatalog.forEach(model => {
-        const cardDiv = document.createElement('div');
-        cardDiv.className = 'model-card';
-        cardDiv.setAttribute('data-link', model.link);
-        cardDiv.innerHTML = `<div><h3>${escapeHtml(model.title)}</h3><p>${escapeHtml(model.desc)}</p></div>`;
-        cardDiv.addEventListener('click', (e) => {
-            e.stopPropagation();
-            window.open(model.link, '_blank');
-        });
-        grid.appendChild(cardDiv);
-    });
-    triggerReveal();
-}
-
-
-
-const faqQuestions = document.querySelectorAll('.faq-question');
-faqQuestions.forEach(q => {
-    q.addEventListener('click', () => {
-        const answerDiv = q.nextElementSibling;
-        const arrowSpan = q.querySelector('span');
-        if (answerDiv.classList.contains('show')) {
-            answerDiv.classList.remove('show');
-            if (arrowSpan) arrowSpan.innerHTML = '▼';
-        } else {
-            answerDiv.classList.add('show');
-            if (arrowSpan) arrowSpan.innerHTML = '▲';
-        }
-    });
-});
-
-const tabs = document.querySelectorAll('.tab-content');
-const navBtns = document.querySelectorAll('.nav-btn');
-
-function switchTab(tabId) {
-    tabs.forEach(tab => {
-        tab.classList.remove('active-tab');
-        if (tab.id === tabId) {
-            tab.classList.add('active-tab');
-        }
-    });
-    navBtns.forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.getAttribute('data-tab') === tabId) {
-            btn.classList.add('active');
-        }
-    });
-    if (tabId === 'models') {
-        setTimeout(() => {
-            buildMarketplaceGrid();
-        }, 30);
+function updatePreview() {
+    let siglas = inputSiglas.value.trim();
+    if (siglas === "") {
+        urlPreviewSpan.innerText = "https://lodepedrosa.github.io/Acortador_de_URLS/?=[tusiglas]";
+        urlPreviewSpan.style.opacity = "0.7";
+    } else {
+        urlPreviewSpan.innerText = `https://lodepedrosa.github.io/Acortador_de_URLS/?=${encodeURIComponent(siglas)}`;
+        urlPreviewSpan.style.opacity = "1";
     }
-    triggerReveal();
 }
 
-navBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-        const tabId = btn.getAttribute('data-tab');
-        switchTab(tabId);
-    });
-});
-document.getElementById('goToFaqBtn')?.addEventListener('click', () => switchTab('p-frecuentes'));
-document.getElementById('goToModelsBtn')?.addEventListener('click', () => switchTab('models'));
-document.getElementById('goToPoliciesBtn')?.addEventListener('click', () => {
-    window.open('./LoDePedro_SA_Documento_Legal.pdf', '_blank');
-});
+inputSiglas.addEventListener("input", updatePreview);
+updatePreview();
 
-switchTab('inicio');
-buildMarketplaceGrid();
-
-window.addEventListener('load', () => {
-    const loader = document.getElementById('loader');
-    if (loader) {
-        setTimeout(() => {
-            loader.style.opacity = '0';
-            loader.style.visibility = 'hidden';
-        }, 500);
+function showMessage(type, message, extraLink = null) {
+    resultArea.style.display = "block";
+    resultArea.classList.remove("result-success", "result-error", "result-info");
+    if (type === "success") {
+        resultArea.classList.add("result-success");
+    } else if (type === "error") {
+        resultArea.classList.add("result-error");
+    } else {
+        resultArea.classList.add("result-info");
     }
-    triggerReveal();
-});
+    resultMessage.innerText = message;
 
-function triggerReveal() {
-    const reveals = document.querySelectorAll('.reveal');
-    reveals.forEach(el => {
-        const rect = el.getBoundingClientRect();
-        const windowHeight = window.innerHeight;
-        if (rect.top < windowHeight - 80) {
-            el.classList.add('visible');
-        } else {
-            if (!el.classList.contains('visible') && rect.top < windowHeight - 50) el.classList.add('visible');
+    if (extraLink && type === "success") {
+        generatedLinkDiv.innerHTML = `<div class="link-example">✅ Tu enlace acortado: <strong>${escapeHtml(extraLink)}</strong><br>
+            <span style="font-size:0.75rem;">👉 Compártelo, redirigirá automáticamente</span></div>`;
+    } else {
+        generatedLinkDiv.innerHTML = "";
+    }
+
+    setTimeout(() => {
+        if (type !== "error") {
         }
-    });
+    }, 5000);
 }
-window.addEventListener('scroll', triggerReveal);
-setTimeout(triggerReveal, 200);
-
-const contactItems = document.querySelectorAll('.contact-item');
-contactItems.forEach(item => {
-    item.addEventListener('click', (e) => {
-        const type = item.getAttribute('data-contact');
-        if (type === 'wa') {
-            window.open('https://wa.me/+542215989210', '_blank');
-        } else if (type === 'mail') {
-            window.open('mailto:pedrogabrielojeda664@gmail.com', '_blank');
-        } else if (type === 'ig') {
-            window.open('https://www.instagram.com/ldp_studios664/', '_blank');
-        }
-    });
-});
 
 function escapeHtml(str) {
+    if (!str) return '';
     return str.replace(/[&<>]/g, function(m) {
         if (m === '&') return '&amp;';
         if (m === '<') return '&lt;';
         if (m === '>') return '&gt;';
         return m;
-    }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-        return c;
     });
 }
 
-console.log("Web LDP cargada con todas las funcionalidades");
+async function enviar() {
+    let urlLarga = inputUrl.value.trim();
+    let siglas = inputSiglas.value.trim();
+
+    if (!urlLarga) {
+        showMessage("error", "❌ Por favor ingresa la URL que deseas acortar.");
+        return;
+    }
+    if (!siglas) {
+        showMessage("error", "❌ Debes escribir las siglas o alias para tu enlace corto.");
+        return;
+    }
+
+    if (!urlLarga.startsWith("http://") && !urlLarga.startsWith("https://")) {
+        showMessage("error", "⚠️ La URL debe comenzar con http:// o https://");
+        return;
+    }
+
+    const siglasLimpio = siglas.trim();
+    if (!/^[a-zA-Z0-9_-]+$/.test(siglasLimpio)) {
+        showMessage("error", "❌ Las siglas solo pueden contener letras, números, guiones (-) y guion bajo (_). Sin espacios.");
+        return;
+    }
+
+    const originalBtnText = btnEnviar.innerText;
+    btnEnviar.innerText = "⏳ Verificando disponibilidad...";
+    btnEnviar.disabled = true;
+
+    try {
+        const querySnapshot = await coleccionRef.where("siglas", "==", siglasLimpio).get();
+
+        if (!querySnapshot.empty) {
+            showMessage("error", `❌ Las siglas "${escapeHtml(siglasLimpio)}" ya están en uso. Elige otro alias.`);
+            btnEnviar.innerText = originalBtnText;
+            btnEnviar.disabled = false;
+            return;
+        }
+
+        const nuevoDocumento = {
+            activo: true,
+            url: urlLarga,
+            siglas: siglasLimpio,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        await coleccionRef.add(nuevoDocumento);
+
+        const urlRedir = `https://lodepedrosa.github.io/Acortador_de_URLS/?=${encodeURIComponent(siglasLimpio)}`;
+        showMessage("success", `✅ ¡Enlace creado exitosamente!`, urlRedir);
+
+        inputSiglas.value = "";
+        updatePreview();
+        inputUrl.value = "";
+    } catch (error) {
+        console.error("Error en Firestore:", error);
+        showMessage("error", `❌ Error al guardar: ${error.message}. Revisa la consola o conexión.`);
+    } finally {
+        btnEnviar.innerText = originalBtnText;
+        btnEnviar.disabled = false;
+    }
+}
+
+async function autorediccionador() {
+    const currentUrl = window.location.href;
+    let parametroSiglas = null;
+
+    const matchEquals = currentUrl.match(/\?=(.+?)(?:&|$)/);
+    if (matchEquals && matchEquals[1]) {
+        parametroSiglas = decodeURIComponent(matchEquals[1]);
+    } else {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has("alias")) {
+            parametroSiglas = urlParams.get("alias");
+        } else if (urlParams.has("siglas")) {
+            parametroSiglas = urlParams.get("siglas");
+        }
+    }
+
+    if (!parametroSiglas) {
+        console.log("[Autoredir] No se detectaron siglas en URL, modo normal.");
+        return;
+    }
+
+    console.log(`[Autoredir] Buscando siglas: "${parametroSiglas}"`);
+
+    try {
+        const querySnapshot = await coleccionRef.where("siglas", "==", parametroSiglas).limit(1).get();
+
+        if (querySnapshot.empty) {
+            console.warn(`[Autoredir] No existe documento con siglas: ${parametroSiglas}`);
+            const bodyMsg = document.createElement("div");
+            bodyMsg.style.position = "fixed";
+            bodyMsg.style.bottom = "20px";
+            bodyMsg.style.left = "20px";
+            bodyMsg.style.background = "#aa2e2ecc";
+            bodyMsg.style.padding = "8px 18px";
+            bodyMsg.style.borderRadius = "40px";
+            bodyMsg.style.color = "white";
+            bodyMsg.style.fontSize = "0.8rem";
+            bodyMsg.style.zIndex = "9999";
+            bodyMsg.innerText = `⚠️ El enlace "${parametroSiglas}" no existe o no está activo.`;
+            document.body.appendChild(bodyMsg);
+            setTimeout(() => bodyMsg.remove(), 4000);
+            return;
+        }
+
+        const doc = querySnapshot.docs[0];
+        const data = doc.data();
+        const destinoUrl = data.url;
+        const activo = data.activo;
+
+        if (!activo) {
+            console.warn(`[Autoredir] La sigla ${parametroSiglas} está desactivada.`);
+            const msgDiv = document.createElement("div");
+            msgDiv.style.position = "fixed";
+            msgDiv.style.bottom = "20px";
+            msgDiv.style.left = "20px";
+            msgDiv.style.background = "#b45f06cc";
+            msgDiv.style.padding = "8px 18px";
+            msgDiv.style.borderRadius = "40px";
+            msgDiv.style.color = "white";
+            msgDiv.innerText = `🔒 El enlace "${parametroSiglas}" se encuentra inactivo.`;
+            document.body.appendChild(msgDiv);
+            setTimeout(() => msgDiv.remove(), 4000);
+            return;
+        }
+
+        if (destinoUrl) {
+            console.log(`[Autoredir] Redirigiendo a: ${destinoUrl}`);
+            window.location.href = destinoUrl;
+        } else {
+            throw new Error("El documento no contiene campo 'url' válido.");
+        }
+    } catch (error) {
+        console.error("[Autoredir] Error crítico:", error);
+        const errorDiv = document.createElement("div");
+        errorDiv.style.position = "fixed";
+        errorDiv.style.bottom = "20px";
+        errorDiv.style.left = "20px";
+        errorDiv.style.background = "#8b0000cc";
+        errorDiv.style.padding = "8px 20px";
+        errorDiv.style.borderRadius = "30px";
+        errorDiv.style.color = "#ffcaca";
+        errorDiv.innerText = `Error al procesar redirección: ${error.message}`;
+        document.body.appendChild(errorDiv);
+        setTimeout(() => errorDiv.remove(), 5000);
+    }
+}
+
+btnEnviar.addEventListener("click", enviar);
+
+window.addEventListener("DOMContentLoaded", () => {
+    setTimeout(() => {
+        autorediccionador();
+    }, 100);
+});
+
+const ejemploDemo = () => {
+    console.log("Acortador LDP listo. Firestore conectado");
+};
+ejemploDemo();
+
+if (window.location.search.includes("?=")) {
+    const hint = document.createElement("div");
+    hint.style.backgroundColor = "#1e2a3a";
+    hint.style.padding = "8px";
+    hint.style.borderRadius = "24px";
+    hint.style.marginTop = "10px";
+    hint.style.fontSize = "0.7rem";
+    hint.style.textAlign = "center";
+    hint.innerText = "🔄 Detectado intento de acceso con siglas. Redirigiendo automáticamente...";
+    document.querySelector(".card").appendChild(hint);
+    setTimeout(() => hint.remove(), 2000);
+}
+
+const helpText = document.createElement("div");
